@@ -70,7 +70,7 @@ async function run() {
       }
       next();
     };
-    
+
     const verifyInstructor = async (req, res, next) => {
       const email = req.decoded.email;
       const query = { email: email };
@@ -132,6 +132,19 @@ async function run() {
       };
 
       const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({ instructor: false });
+      }
+
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = { instructor: user?.role === "instructor" };
       res.send(result);
     });
 
