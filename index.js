@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -48,6 +48,7 @@ async function run() {
     await client.connect();
 
     const usersCollection = client.db("martialDb").collection("users");
+    const classesCollection = client.db("martialDb").collection("classes");
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -145,6 +146,18 @@ async function run() {
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       const result = { instructor: user?.role === "instructor" };
+      res.send(result);
+    });
+
+    // classes api
+    app.get("/classes", async (req, res) => {
+      const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/classes", verifyJWT, verifyInstructor, async (req, res) => {
+      const newClasses = req.body;
+      const result = await classesCollection.insertOne(newClasses);
       res.send(result);
     });
 
