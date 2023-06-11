@@ -89,7 +89,6 @@ async function run() {
       "/users",
       verifyJWT,
       verifyAdmin,
-      verifyInstructor,
       async (req, res) => {
         const result = await usersCollection.find().toArray();
         res.send(result);
@@ -150,8 +149,43 @@ async function run() {
     });
 
     // classes api
-    app.get("/classes", async (req, res) => {
+    app.get("/classes", verifyJWT, verifyAdmin, async (req, res) => {
       const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/classes/pending", verifyJWT, verifyAdmin, async (req, res) => {
+      const pendingClasses = await classesCollection
+        .find({ status: "pending" })
+        .toArray();
+      res.send(pendingClasses);
+    });
+
+    app.patch("/classes/feedback/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          feedback: req.body.feedback,
+        },
+      };
+
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.patch("/classes/admin/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: req.body.status,
+        },
+      };
+
+      const result = await classesCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
