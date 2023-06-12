@@ -85,15 +85,10 @@ async function run() {
     };
 
     //* users api
-    app.get(
-      "/users",
-      verifyJWT,
-      verifyAdmin,
-      async (req, res) => {
-        const result = await usersCollection.find().toArray();
-        res.send(result);
-      }
-    );
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -135,12 +130,12 @@ async function run() {
       res.send(result);
     });
 
-    app.delete('/users/:id', verifyJWT, verifyAdmin, async (req, res) => {
+    app.delete("/users/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
+      const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
     app.patch("/users/instructor/:id", async (req, res) => {
       const id = req.params.id;
@@ -170,7 +165,7 @@ async function run() {
     });
 
     // classes api
-    app.get("/classes", verifyJWT, verifyAdmin, async (req, res) => {
+    app.get("/classes", verifyJWT, async (req, res) => {
       const result = await classesCollection.find().toArray();
       res.send(result);
     });
@@ -216,6 +211,15 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/classes/instructor", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { instructorEmail: req.query.email };
+      }
+
+      const result = await classesCollection.find(query).toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
