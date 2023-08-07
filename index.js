@@ -11,6 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (!authorization) {
@@ -186,6 +187,22 @@ async function run() {
         .find({ status: "approved" })
         .toArray();
       res.send(approvedClasses);
+    });
+
+    app.get("/api/classes/approved/dsc", async (req, res) => {
+      try {
+        const options = {
+          sort: { enrolled: -1 },
+        };
+        const approvedClass = await classesCollection
+          .find({ status: "approved" }, options)
+          .limit(6)
+          .toArray();
+        res.send(approvedClass);
+      } catch (error) {
+        console.error("Error retrieving approved classes:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.patch("/classes/feedback/:id", async (req, res) => {
